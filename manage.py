@@ -5,7 +5,7 @@ import pymysql
 pymysql.install_as_MySQLdb()
 
 if __name__ == "__main__":
-    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "wq_if.settings")
+    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "wsato_qiligeer_web.settings")
 
     from django.core.management import execute_from_command_line
 

@@ -1,5 +1,6 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponse
+from rest_framework import status
 
 from vm.models import Domains
 from vm.forms import DomainForm
@@ -18,10 +19,6 @@ def login(request):
     if request.method == 'POST':
         form = LoginForm(request.POST)
         if form.is_valid():
-            # TODO 認証
-            # TODO その人のインスタンス一覧をとる
-            print(form.cleaned_data['display_name'])
-            # form.cleaned_data['user']
             return redirect('vm:instance_list')
     else:
         form = LoginForm
@@ -32,20 +29,21 @@ def login(request):
 def instance_list(request):
     payload = {'user_id': request.user.id}
     response = requests.get(API_ENDPOINT_URL, payload)
-    print(response)
-    decoded_json = json.loads(response.content.decode('utf-8'))
+
+    decoded_json = []
+    if response.status_code != status.HTTP_404_NOT_FOUND:
+    	decoded_json = json.loads(response.content.decode('utf-8'))
     return render(request,
                   'vm/instance_list.html',
                   {'instances': decoded_json})
 
+@login_required(redirect_field_name='accounts')
 def instance_create(request):
     domains = Domains()
 
     if request.method == 'POST':
         form = DomainForm(request.POST, instance = domains)
         if form.is_valid():
-            form.cleaned_data['name']
-
             payload = {
                 'op':  'create',
                 'name': form.cleaned_data['name'],
@@ -61,7 +59,7 @@ def instance_create(request):
 
     return render(request, 'vm/instance_create.html', dict(form=form))
 
-
+@login_required(redirect_field_name='accounts')
 def instance_operation(request):
     op = ''
     if 'button_start' in request.POST:

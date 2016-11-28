@@ -10,4 +10,4 @@ class DomainForm(ModelForm):
     """インスタンスのフォーム"""
     class Meta:
         model = Domains
-        fields = ('display_name', 'size', 'ram', 'vcpus')
+        fields = ('name', 'size', 'ram', 'vcpus')

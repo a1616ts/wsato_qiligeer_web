@@ -3,7 +3,7 @@ from django.db import models
 # Create your models here.
 class Domains(models.Model):
     """ドメイン"""
-    display_name = models.CharField('instance name', max_length=45)
+    name = models.CharField('instance name', max_length=45)
     user_id = models.IntegerField('user id')
     server_id = models.IntegerField('serever id')
     size = models.IntegerField('size')
