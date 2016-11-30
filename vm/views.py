@@ -8,9 +8,8 @@ from vm.forms import LoginForm
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 from django.contrib.auth.models import User
-
-import requests
 import json
+import requests
 
 API_ENDPOINT_URL = 'http://localhost:8000/vm'
 
@@ -27,7 +26,8 @@ def login(request):
 
 @login_required(redirect_field_name='accounts')
 def instance_list(request):
-    payload = {'user_id': request.user.id}
+    user_id = request.user.id
+    payload = {'user_id': user_id}
     response = requests.get(API_ENDPOINT_URL, payload)
 
     decoded_json = []
@@ -35,7 +35,7 @@ def instance_list(request):
     	decoded_json = json.loads(response.content.decode('utf-8'))
     return render(request,
                   'vm/instance_list.html',
-                  {'instances': decoded_json})
+                  {'instances': decoded_json, 'user_id' : user_id})
 
 @login_required(redirect_field_name='accounts')
 def instance_create(request):
@@ -47,12 +47,12 @@ def instance_create(request):
             payload = {
                 'op':  'create',
                 'name': form.cleaned_data['name'],
-                'user_id': request.user.id,
-                'size': form.cleaned_data['size'],
-                'ram': form.cleaned_data['ram'],
-                'vcpus': form.cleaned_data['vcpus'],
+                'user_id': str(request.user.id),
+                'size': str(form.cleaned_data['size']),
+                'ram': str(form.cleaned_data['ram']),
+                'vcpus': str(form.cleaned_data['vcpus']),
             }
-            requests.post(API_ENDPOINT_URL, data = json.dumps(payload))
+            requests.post(API_ENDPOINT_URL, payload)
             return redirect('vm:instance_list')
     else:    # GET の時
         form = DomainForm(instance = domains)
@@ -79,5 +79,5 @@ def instance_operation(request):
             'op':   op,
             'name': request.POST['name'],
         }
-        requests.put(API_ENDPOINT_URL, data = json.dumps(payload))
+        requests.put(API_ENDPOINT_URL, payload)
         return redirect('vm:instance_list')

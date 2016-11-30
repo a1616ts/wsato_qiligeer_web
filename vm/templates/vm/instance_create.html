@@ -3,7 +3,15 @@
 
 {% block title %}Create Instance{% endblock title %}
 
+{% block extrahead %}
+{% load staticfiles %}
+<link href="{% static 'wsato_qiligeer_web/style.css' %}" rel="stylesheet">
+{% endblock %}
+
 {% block content %}
+    <div class="div">
+      <a href="http://localhost:8001/accounts/logout/" class="op_button_logout_style">logout</a>
+    </div>
     <h3 class="page-header">Create Instance</h3>
     {% if instance_id %}
     <form action="{% url 'vm:instance_mod' instance_id=instance_id %}" method="post" class="form-horizontal" role="form">
@@ -14,9 +22,10 @@
       {{ form|bootstrap_horizontal }}
       <div class="form-group">
         <div class="col-sm-offset-2 col-sm-10">
-          <button type="submit" class="btn btn-primary">submit</button>
+          <button type="submit" class="op_button_submit_style">submit</button>
         </div>
       </div>
     </form>
-    <a href="{% url 'vm:instance_list' %}" class="btn btn-default btn-sm">back</a>
+    <br>
+    <a href="{% url 'vm:instance_list' %}" class="op_button_link_style">back</a>
 {% endblock content %}
