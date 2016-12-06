@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% load bootstrap %}
+
+{% block title %}Create Instance{% endblock title %}
+
+{% block extrahead %}
+{% load staticfiles %}
+<link href="{% static 'wsato_qiligeer_web/style.css' %}" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+    <div class="div">
+      <a href="http://localhost:8001/accounts/logout/" class="op_button_logout_style">logout</a>
+    </div>
+    <br>
+    <h1>Sorry, an error occurred.</h1>
+    <br>
+    <a href="{% url 'vm:instance_list' %}" class="op_button_link_style">back</a>
+{% endblock content %}

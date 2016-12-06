@@ -8,13 +8,14 @@ from vm.forms import LoginForm
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 from django.contrib.auth.models import User
+from vm.models import OS_CHOICES
+import io
 import json
 import requests
 
 API_ENDPOINT_URL = 'http://localhost:8000/vm'
 
 def login(request):
-    """login"""
     if request.method == 'POST':
         form = LoginForm(request.POST)
         if form.is_valid():
@@ -32,7 +33,8 @@ def instance_list(request):
 
     decoded_json = []
     if response.status_code != status.HTTP_404_NOT_FOUND:
-    	decoded_json = json.loads(response.content.decode('utf-8'))
+        decoded_json = json.loads(response.content.decode('utf-8'))
+
     return render(request,
                   'vm/instance_list.html',
                   {'instances': decoded_json, 'user_id' : user_id})
@@ -45,39 +47,68 @@ def instance_create(request):
         form = DomainForm(request.POST, instance = domains)
         if form.is_valid():
             payload = {
-                'op':  'create',
-                'name': form.cleaned_data['name'],
+                'op':      'create',
+                'os':      OS_CHOICES[int(form.cleaned_data['os'])][1],
+                'name':    form.cleaned_data['name'],
                 'user_id': str(request.user.id),
-                'size': str(form.cleaned_data['size']),
-                'ram': str(form.cleaned_data['ram']),
-                'vcpus': str(form.cleaned_data['vcpus']),
+                'size':    str(form.cleaned_data['size']),
+                'ram':     str(form.cleaned_data['ram']),
+                'vcpus':   str(form.cleaned_data['vcpus']),
             }
-            requests.post(API_ENDPOINT_URL, payload)
-            return redirect('vm:instance_list')
-    else:    # GET の時
+            response = requests.post(API_ENDPOINT_URL, payload)
+            if response.status_code == status.HTTP_202_ACCEPTED:
+                return redirect('vm:instance_list')
+            else:
+                return redirect('vm:error')
+    else:
         form = DomainForm(instance = domains)
 
     return render(request, 'vm/instance_create.html', dict(form=form))
 
 @login_required(redirect_field_name='accounts')
 def instance_operation(request):
-    op = ''
-    if 'button_start' in request.POST:
-        op = 'start'
-    elif 'button_close' in request.POST:
-        op = 'close'
-    elif 'button_resume' in request.POST:
-        op = 'resume'
-    elif 'button_suspend' in request.POST:
-        op = 'suspend'
-    elif 'button_destroy' in request.POST:
-        op = 'destory'
-
     if request.method == 'POST':
+        op = None
+        if 'button_start' in request.POST:
+            op = 'start'
+        elif 'button_close' in request.POST:
+            op = 'close'
+        elif 'button_resume' in request.POST:
+            op = 'resume'
+        elif 'button_suspend' in request.POST:
+            op = 'suspend'
+        elif 'button_delete' in request.POST:
+            op = 'destory'
+        else:
+            return redirect('vm:error')
+
         payload = {
             'user_id': request.user.id,
-            'op':   op,
-            'name': request.POST['name'],
+            'name':    request.POST['name'],
         }
-        requests.put(API_ENDPOINT_URL, payload)
-        return redirect('vm:instance_list')
+
+        if op == 'destory':
+            response = requests.delete(API_ENDPOINT_URL, data = payload)
+        else:
+            payload['op'] = op
+            response = requests.put(API_ENDPOINT_URL, payload)
+
+        if response.status_code == status.HTTP_202_ACCEPTED:
+            return redirect('vm:instance_list')
+        else:
+            return redirect('vm:error')
+
+@login_required(redirect_field_name='accounts')
+def download(request, sshkey_path):
+    output = io.StringIO()
+    # TODO パス直す
+    f = open("/Users/tmkst/" + sshkey_path + ".c")
+    data = f.read()
+    f.close()
+    response = HttpResponse(data, content_type='Content-Type: application/x-x509-user-cert')
+    response['Content-Disposition'] = 'filename=key.pem'
+    return response
+
+@login_required(redirect_field_name='accounts')
+def error(request):
+    return render(request, 'vm/error.html')

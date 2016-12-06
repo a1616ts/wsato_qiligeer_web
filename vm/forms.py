@@ -7,7 +7,6 @@ class LoginForm(forms.Form):
     password = forms.CharField()
 
 class DomainForm(ModelForm):
-    """インスタンスのフォーム"""
     class Meta:
         model = Domains
-        fields = ('name', 'size', 'ram', 'vcpus')
+        fields = ('name', 'os', 'size', 'ram', 'vcpus')

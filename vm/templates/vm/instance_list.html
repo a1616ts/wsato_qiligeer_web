@@ -29,8 +29,8 @@ setTimeout("location.reload()", 1000 * 5);
           <th>size</th>
           <th>ram</th>
           <th>vcpus</th>
-          <th>ip</th>
-          <th>key_path</th>
+          <th>ip v4 address</th>
+          <th>ssh key</th>
           <th>create date</th>
           <th>update date</th>
           <th>operations</th>
@@ -41,12 +41,12 @@ setTimeout("location.reload()", 1000 * 5);
         <tr>
           <td>{{ domain.id }}</td>
           <td>{{ domain.name }}</td>
+          <td>{{ domain.status}}</td>
           <td>{{ domain.size }}</td>
-          <td>{{ domain.status }}</td>
           <td>{{ domain.ram }}</td>
           <td>{{ domain.vcpus }}</td>
           <td>{{ domain.ipv4_address }}</td>
-          <td>{{ domain.sshkey_path }}</td>
+          <td><a class="op_button_download_style" href="{% url 'vm:download' domain.sshkey_path %}">download</a></td>
           <td>{{ domain.create_date }}</td>
           <td>{{ domain.update_date }}</td>
           <td>
@@ -54,7 +54,7 @@ setTimeout("location.reload()", 1000 * 5);
             {% csrf_token %}
             <input id="id_name" name="name" type="hidden" value="{{ domain.name }}">
             <button type="submit" name="button_start" class="op_button_submit_style">start</button>
-            <button type="submit" name="button_stop" class="op_button_submit_style">stop</button>
+            <button type="submit" name="button_close" class="op_button_submit_style">stop</button>
             <button type="submit" name="button_resume" class="op_button_submit_style">resume</button>
             <button type="submit" name="button_suspend" class="op_button_submit_style">suspend</button>
             <button type="submit" name="button_delete" class="op_button_submit_style">delete</button>
