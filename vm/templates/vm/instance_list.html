@@ -41,12 +41,16 @@ setTimeout("location.reload()", 1000 * 5);
         <tr>
           <td>{{ domain.id }}</td>
           <td>{{ domain.name }}</td>
-          <td>{{ domain.status}}</td>
+          <td>{{ domain.status }}</td>
           <td>{{ domain.size }}</td>
           <td>{{ domain.ram }}</td>
           <td>{{ domain.vcpus }}</td>
           <td>{{ domain.ipv4_address }}</td>
-          <td><a class="op_button_download_style" href="{% url 'vm:download' user_id domain.name %}">download</a></td>
+          <td>
+          {% if domain.status != None %}
+            <a class="op_button_download_style" href="{% url 'vm:download' user_id domain.name %}">download</a>
+          {% endif %}
+          </td>
           <td>{{ domain.create_date }}</td>
           <td>{{ domain.update_date }}</td>
           <td>
