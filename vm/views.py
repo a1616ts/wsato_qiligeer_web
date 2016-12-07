@@ -23,7 +23,7 @@ def login(request):
     else:
         form = LoginForm
         instance_id = 1
-        return render(request, 'vm/login.html', dict(form=form, instance_id=instance_id))
+        return render(request, 'vm/login.html', dict(form = form, instance_id = instance_id))
 
 @login_required(redirect_field_name='accounts')
 def instance_list(request):
@@ -37,7 +37,7 @@ def instance_list(request):
 
     return render(request,
                   'vm/instance_list.html',
-                  {'instances': decoded_json, 'user_id' : user_id})
+                  {'instances' : decoded_json, 'user_id' : user_id})
 
 @login_required(redirect_field_name='accounts')
 def instance_create(request):
@@ -99,10 +99,18 @@ def instance_operation(request):
             return redirect('vm:error')
 
 @login_required(redirect_field_name='accounts')
-def download(request, sshkey_path):
+def download(request, user_id, name):
     output = io.StringIO()
-    # TODO パス直す
-    f = open("/Users/tmkst/" + sshkey_path + ".c")
+    response = requests.get(API_ENDPOINT_URL, {
+        'user_id' : user_id,
+        'name'    : name,
+    })
+    decoded_json = []
+    if response.status_code == status.HTTP_404_NOT_FOUND:
+        return render(request, 'vm/error.html')
+    else:
+        decoded_json = json.loads(response.content.decode('utf-8'))
+    f = open(decoded_json['sshkey_path'])
     data = f.read()
     f.close()
     response = HttpResponse(data, content_type='Content-Type: application/x-x509-user-cert')

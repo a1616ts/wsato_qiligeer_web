@@ -46,7 +46,7 @@ setTimeout("location.reload()", 1000 * 5);
           <td>{{ domain.ram }}</td>
           <td>{{ domain.vcpus }}</td>
           <td>{{ domain.ipv4_address }}</td>
-          <td><a class="op_button_download_style" href="{% url 'vm:download' domain.sshkey_path %}">download</a></td>
+          <td><a class="op_button_download_style" href="{% url 'vm:download' user_id domain.name %}">download</a></td>
           <td>{{ domain.create_date }}</td>
           <td>{{ domain.update_date }}</td>
           <td>
