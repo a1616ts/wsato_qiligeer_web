@@ -16,14 +16,14 @@ import requests
 API_ENDPOINT_URL = 'http://localhost:8000/vm'
 
 def login(request):
-    if request.method == 'POST':
+    if request.method is 'POST':
         form = LoginForm(request.POST)
         if form.is_valid():
             return redirect('vm:instance_list')
     else:
         form = LoginForm
         instance_id = 1
-        return render(request, 'vm/login.html', dict(form = form, instance_id = instance_id))
+        return render(request, 'vm/login.html', dict(form=form, instance_id=instance_id))
 
 @login_required(redirect_field_name='accounts')
 def instance_list(request):
@@ -32,42 +32,42 @@ def instance_list(request):
     response = requests.get(API_ENDPOINT_URL, payload)
 
     decoded_json = []
-    if response.status_code != status.HTTP_404_NOT_FOUND:
+    if response.status_code is not status.HTTP_404_NOT_FOUND:
         decoded_json = json.loads(response.content.decode('utf-8'))
 
     return render(request,
                   'vm/instance_list.html',
-                  {'instances' : decoded_json, 'user_id' : user_id})
+                  {'instances': decoded_json, 'user_id': user_id})
 
 @login_required(redirect_field_name='accounts')
 def instance_create(request):
     domains = Domains()
 
     if request.method == 'POST':
-        form = DomainForm(request.POST, instance = domains)
+        form = DomainForm(request.POST, instance=domains)
         if form.is_valid():
             payload = {
-                'op':      'create',
-                'os':      OS_CHOICES[int(form.cleaned_data['os'])][1],
-                'name':    form.cleaned_data['name'],
+                'op': 'create',
+                'os': OS_CHOICES[int(form.cleaned_data['os'])][1],
+                'name': form.cleaned_data['name'],
                 'user_id': str(request.user.id),
-                'size':    str(form.cleaned_data['size']),
-                'ram':     str(form.cleaned_data['ram']),
-                'vcpus':   str(form.cleaned_data['vcpus']),
+                'size': str(form.cleaned_data['size']),
+                'ram': str(form.cleaned_data['ram']),
+                'vcpus': str(form.cleaned_data['vcpus']),
             }
             response = requests.post(API_ENDPOINT_URL, payload)
-            if response.status_code == status.HTTP_202_ACCEPTED:
+            if response.status_code is status.HTTP_202_ACCEPTED:
                 return redirect('vm:instance_list')
             else:
                 return redirect('vm:error')
     else:
-        form = DomainForm(instance = domains)
+        form = DomainForm(instance=domains)
 
     return render(request, 'vm/instance_create.html', dict(form=form))
 
 @login_required(redirect_field_name='accounts')
 def instance_operation(request):
-    if request.method == 'POST':
+    if request.method is 'POST':
         op = None
         if 'button_start' in request.POST:
             op = 'start'
@@ -84,11 +84,11 @@ def instance_operation(request):
 
         payload = {
             'user_id': request.user.id,
-            'name':    request.POST['name'],
+            'name': request.POST['name'],
         }
 
         if op == 'destory':
-            response = requests.delete(API_ENDPOINT_URL, data = payload)
+            response = requests.delete(API_ENDPOINT_URL, data=payload)
         else:
             payload['op'] = op
             response = requests.put(API_ENDPOINT_URL, payload)
@@ -102,11 +102,11 @@ def instance_operation(request):
 def download(request, user_id, name):
     output = io.StringIO()
     response = requests.get(API_ENDPOINT_URL, {
-        'user_id' : user_id,
-        'name'    : name,
+        'user_id': user_id,
+        'name': name,
     })
     decoded_json = []
-    if response.status_code == status.HTTP_404_NOT_FOUND:
+    if response.status_code is status.HTTP_404_NOT_FOUND:
         return render(request, 'vm/error.html')
     else:
         decoded_json = json.loads(response.content.decode('utf-8'))
